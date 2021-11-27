@@ -3,14 +3,15 @@ export type NativeType = Deno.NativeType | "buffer"
 export type FFIForeignFunction<
     Parameters extends NativeType[], 
     Result extends Deno.NativeType,
-    Nonblock extends (boolean | undefined),
+    Nonblock extends boolean = false,
 > = {
     parameters: [...Parameters],
     result: Result,
-    nonblocking?: Nonblock 
-}
+    nonblocking?: Nonblock
+} 
 
 type BlockPromise<Block extends (boolean | undefined), Result> = Block extends true ? Promise<Result> : Result 
+
 type NativeToType<Type extends NativeType | undefined = undefined> =
     Type extends undefined ? [arg?: never] 
     : Type extends "buffer"
@@ -37,3 +38,19 @@ export type ForeignFunctionSignature<
     Result extends Deno.NativeType,
     Nonblock extends (boolean | undefined)
 > = (...arg: NativeArrayToTypes<Parameters>) => BlockPromise<Nonblock, NativeToType<Result>[0]>
+
+export type OpenFunction<S extends Record<string, Deno.ForeignFunction>> = (
+    filename: string | URL,
+    symbols: S,
+  ) => Deno.DynamicLibrary<S>
+
+export type ForeignSignature<
+    Key extends string, 
+    Parameters extends NativeType[], 
+    Result extends Deno.NativeType, 
+    Nonblock extends boolean = false 
+> = {[P in Key]: FFIForeignFunction<
+    Parameters,
+    Result,
+    Nonblock
+>}

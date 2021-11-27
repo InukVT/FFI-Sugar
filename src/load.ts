@@ -1,4 +1,5 @@
-import { NativeType, FFIForeignFunction, ForeignFunctionSignature } from "./types.ts"
+import { ForeignSignature } from "./types.ts";
+import { NativeType, ForeignFunctionSignature, OpenFunction } from "./types.ts"
 
 /**
  * Sugary way to load in FFI functions
@@ -10,16 +11,25 @@ export const load: (path: string | URL) => <
     Key extends string,
     Parameters extends NativeType[],
     Result extends Deno.NativeType,
-    Nonblock extends (boolean | undefined),
+    Nonblock extends boolean = false,
 >(
-    symbol: {[P in Key]: FFIForeignFunction<
+    symbol: ForeignSignature<
+        Key,
         Parameters,
         Result,
         Nonblock
-    >},
+    >,
+    open?: OpenFunction<
+        ForeignSignature<
+            Key,
+            Parameters,
+            Result,
+            Nonblock
+        >
+    >
     // @ts-ignore no way to cast the type
-) =>  { [P in Key]: ForeignFunctionSignature<Parameters, Result, Nonblock> } = (path) => (symbol) => {
-    const ffi = Deno.dlopen(path,symbol)
+) =>  { [P in Key]: ForeignFunctionSignature<Parameters, Result, Nonblock> } = (path) => (symbol, open = Deno.dlopen) => {
+    const ffi = open(path,symbol)
     return ffi.symbols
 }
 
@@ -32,16 +42,18 @@ export const signature: <
     Key extends string,
     Parameters extends NativeType[],
     Result extends Deno.NativeType,
-    Nonblock extends (boolean | undefined),
+    Nonblock extends boolean = false,
 >(
-signature: {[P in Key]: FFIForeignFunction<
+    signature: ForeignSignature<
+        Key,
+        Parameters,
+        Result,
+        Nonblock
+    >
+) => ForeignSignature<
+    Key,
     Parameters,
     Result,
     Nonblock
->}
-) => {[P in Key]: FFIForeignFunction<
-    Parameters,
-    Result,
-    Nonblock
->} = (symbol) => symbol
+> = (symbol) => symbol
 
