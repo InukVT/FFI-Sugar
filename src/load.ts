@@ -7,7 +7,7 @@ import { NativeType, ForeignFunctionSignature, OpenFunction } from "./types.ts"
  * @param {Deno.ForeignFunction} symbol The symbol of the function to be loaded. NOTE: this wil hopefully support multiple types of symbols in the future
  * @returns The function loaded
  */
-export const load: (path: string | URL) => <
+export const load: <Path extends string | URL>(path: Path) => <
     Key extends string,
     Parameters extends NativeType[],
     Result extends Deno.NativeType,
@@ -20,6 +20,7 @@ export const load: (path: string | URL) => <
         Nonblock
     >,
     open?: OpenFunction<
+        Path,
         ForeignSignature<
             Key,
             Parameters,

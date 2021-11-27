@@ -39,8 +39,8 @@ export type ForeignFunctionSignature<
     Nonblock extends (boolean | undefined)
 > = (...arg: NativeArrayToTypes<Parameters>) => BlockPromise<Nonblock, NativeToType<Result>[0]>
 
-export type OpenFunction<S extends Record<string, Deno.ForeignFunction>> = (
-    filename: string | URL,
+export type OpenFunction<Path,S extends Record<string, Deno.ForeignFunction>> = (
+    filename: Path,
     symbols: S,
   ) => Deno.DynamicLibrary<S>
 
